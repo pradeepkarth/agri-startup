@@ -1,0 +1,17 @@
+{
+  "folders": [{ "path": "." }],
+  "settings": {
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2,
+    "files.exclude": {
+      "dist": true,
+      "node_modules": true
+    },
+    "search.exclude": {
+      "node_modules": true,
+      "dist": true,
+      "logs": true,
+      ".vscode/chrome-debug-profile": true
+    }
+  }
+}

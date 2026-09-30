@@ -1,0 +1,24 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Bosqen: Launch Chrome (dev)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:5173",
+      "webRoot": "${workspaceFolder}/src",
+      "preLaunchTask": "npm: dev",
+      "runtimeArgs": ["--incognito", "--auto-open-devtools-for-tabs"],
+      "userDataDir": "${workspaceFolder}/.vscode/chrome-debug-profile",
+      "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
+      "postDebugTask": "Stop dev server"
+    },
+    {
+      "name": "Bosqen: Attach to Chrome",
+      "type": "chrome",
+      "request": "attach",
+      "port": 9229,
+      "webRoot": "${workspaceFolder}/src"
+    }
+  ]
+}

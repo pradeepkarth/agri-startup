@@ -1,0 +1,40 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "npm: dev",
+      "type": "npm",
+      "script": "dev",
+      "problemMatcher": [],
+      "isBackground": true,
+      "dependsOn": "Free port 5173",
+      "detail": "Free port 5173 from any stale server, then start Vite on http://localhost:5173"
+    },
+    {
+      "label": "Free port 5173",
+      "type": "shell",
+      "command": "lsof -ti :5173 | xargs kill 2>/dev/null || true",
+      "problemMatcher": [],
+      "detail": "Kills any stale/dead dev server still holding port 5173 so F5 always gets a fresh one"
+    },
+    {
+      "label": "npm: build",
+      "type": "npm",
+      "script": "build",
+      "group": "build",
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "npm: preview",
+      "type": "npm",
+      "script": "preview",
+      "problemMatcher": []
+    },
+    {
+      "label": "Stop dev server",
+      "type": "shell",
+      "command": "lsof -ti :5173 | xargs kill 2>/dev/null || true",
+      "problemMatcher": []
+    }
+  ]
+}
