@@ -11,7 +11,7 @@ export default function FAQ() {
       <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
         <div className="text-center">
           <Reveal>
-            <p className="text-sm font-semibold tracking-widest text-violet-400 uppercase">
+            <p className="text-sm font-semibold tracking-widest text-brand-400 uppercase">
               {FAQS.eyebrow}
             </p>
             <h2 className="mt-3 text-3xl font-bold tracking-tight text-white sm:text-4xl">
@@ -35,7 +35,7 @@ export default function FAQ() {
                     <span className="font-medium text-white">{faq.q}</span>
                     <Plus
                       className={`h-5 w-5 shrink-0 text-slate-500 transition-transform duration-300 ${
-                        open ? 'rotate-45 text-violet-400' : ''
+                        open ? 'rotate-45 text-brand-400' : ''
                       }`}
                     />
                   </button>

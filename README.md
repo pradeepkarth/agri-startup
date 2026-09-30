@@ -4,6 +4,23 @@ A single-page marketing site for **Bosqen**, an AI-driven digital marketing plat
 
 All site copy lives in **`src/constants/content.js`** — edit strings there, not in components. Pricing and trials are enquiry-based via `support@bosqen.com` (no sign-up/login flows).
 
+## Standalone pages
+
+- **`/privacy-policy.html`** — privacy policy covering GDPR/CCPA-style rights, POS data handling, subprocessors, retention, and cookies. Copy lives in `src/constants/content.js` under `PRIVACY`.
+- **`/contact.html`** — standalone demo/enquiry form (name, optional business, email, phone, message, consent). Submissions POST to **FormSubmit** and are delivered to `support@bosqen.com` (see `src/pages/EnquiryFormPage.jsx`).
+
+Both are standalone Vite entry points (multi-page build configured in `vite.config.js`) and share the site styling.
+
+#### Enquiry form activation (one-time)
+
+FormSubmit requires email verification before it delivers anything:
+
+1. Submit the form once (or run: `curl -X POST https://formsubmit.co/ajax/support@bosqen.com -H "Content-Type: application/json" -d '{"Name":"activate","Email":"a@b.c","_captcha":"false"}'`)
+2. FormSubmit sends an **activation email** to `support@bosqen.com`
+3. Click **Activate Form** in that email — done. Every future enquiry lands in the inbox.
+
+If submissions ever fail, the form shows a fallback message directing visitors to email `support@bosqen.com` directly.
+
 ## Sections (single page, top-to-bottom)
 
 1. **Hero** — operator-first headline, animated AI dashboard mock, campaign badge
@@ -40,6 +57,10 @@ npm run dev      # http://localhost:5173
 ## Other scripts
 
 ```bash
-npm run build    # production build to dist/
+npm run build    # production build to dist/ (all three pages)
 npm run preview  # serve the production build locally
 ```
+
+### Deploy (Vercel)
+
+Deploys are automated via GitHub Actions (`.github/workflows/vercel-deploy.yml`): pushes to `main` go to production, PRs get preview URLs. Requires the `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID` repo secrets.

@@ -2,7 +2,10 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { mkdirSync, writeFileSync, readFileSync } from 'node:fs'
-import { resolve } from 'node:path'
+import { resolve, dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
 
 /**
  * Launch-log plugin (dev only).
@@ -78,4 +81,13 @@ function launchLog() {
 
 export default defineConfig({
   plugins: [react(), tailwindcss(), launchLog()],
+  build: {
+    rollupOptions: {
+      input: {
+        main: resolve(__dirname, 'index.html'),
+        privacy: resolve(__dirname, 'privacy-policy.html'),
+        contact: resolve(__dirname, 'contact.html'),
+      },
+    },
+  },
 })

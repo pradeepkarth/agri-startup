@@ -15,6 +15,12 @@ import {
   RefreshCw,
 } from 'lucide-react'
 
+export const routes = {
+  home: '/',
+  privacy: '/privacy-policy.html',
+  contact: '/contact.html',
+}
+
 
 /* ------------------------------------------------------------------ */
 /*  Brand                                                              */
@@ -270,15 +276,232 @@ export const CONTACT = {
 }
 
 /* ------------------------------------------------------------------ */
+/*  Privacy policy                                                     */
+/* ------------------------------------------------------------------ */
+
+export const PRIVACY = {
+  lastUpdated: 'September 30, 2026',
+  contactLine: `Questions about this policy? Email ${BRAND.email} and a human replies within one business day.`,
+  intro:
+    'This policy explains what information Bosqen collects when you use our website or any of our products and services — including those we launch in the future — how we use it, and the choices you have. We designed it to be readable — no walls of legalese.',
+  sections: [
+    {
+      id: 'data-we-collect',
+      title: '1. Data we collect',
+      body: [
+        {
+          heading: 'Information you give us',
+          text: 'Enquiry and contact-form details (name, business name, email, phone, and anything you tell us about your business), plus any information you share during discovery calls or onboarding.',
+        },
+        {
+          heading: 'Information processed by our products',
+          text: 'Depending on which Bosqen product or service you use, this may include account details, business data (such as transaction records, catalogue, inventory, or campaign data), and configuration needed to run that product for your business. Product-specific details are provided in the relevant product terms.',
+        },
+        {
+          heading: 'Information collected automatically',
+          text: 'Device and browser details, IP address, and basic usage analytics (pages viewed, features used) so we can keep the service fast and secure.',
+        },
+      ],
+    },
+    {
+      id: 'how-we-use-data',
+      title: '2. How we use data',
+      body: [
+        {
+          heading: 'Purpose limitation',
+          text: 'We use your data only to provide and support the service: operating our products, answering enquiries, billing, and improving reliability.',
+        },
+        {
+          heading: 'No sale of data, ever',
+          text: 'We do not sell, rent, or trade personal data. We do not use your business or customer data to train third-party AI models without explicit opt-in.',
+        },
+        {
+          heading: 'Legitimate interests',
+          text: 'Where we rely on legitimate interests (e.g. fraud prevention, service security), we balance those interests against your rights and document that assessment.',
+        },
+      ],
+    },
+    {
+      id: 'legal-bases',
+      title: '3. Legal bases for processing',
+      body: [
+        {
+          heading: 'Contract',
+          text: 'Processing needed to deliver the product or service you signed up for — running the features you use and producing the reports they generate.',
+        },
+        {
+          heading: 'Consent',
+          text: 'Optional things like marketing emails or product-feedback programmes, which you can withdraw at any time.',
+        },
+        {
+          heading: 'Legal obligation',
+          text: 'Retaining invoices and transaction records where tax, accounting, or law requires it.',
+        },
+      ],
+    },
+    {
+      id: 'sharing',
+      title: '4. Sharing & subprocessors',
+      body: [
+        {
+          heading: 'Who we share with',
+          text: 'Only vetted subprocessors needed to run the service — e.g. cloud hosting, payment processing, email delivery, and error monitoring. Each is bound by data-processing agreements.',
+        },
+        {
+          heading: 'Never for their marketing',
+          text: 'Subprocessors may use data only to deliver their function for us, never to market their own or others’ products.',
+        },
+        {
+          heading: 'Disclosure by law',
+          text: 'We disclose data only when legally compelled, and we notify you unless legally prohibited from doing so.',
+        },
+      ],
+    },
+    {
+      id: 'retention-security',
+      title: '5. Retention & security',
+      body: [
+        {
+          heading: 'Retention',
+          text: 'We keep personal data only as long as needed for the purposes above. Transaction and accounting records are retained for the statutory period; enquiry data is deleted after 24 months of inactivity.',
+        },
+        {
+          heading: 'Security',
+          text: 'Encryption in transit (TLS) and at rest, role-based access control, audit logging, and least-privilege access for staff. Access to customer data is logged and reviewed.',
+        },
+        {
+          heading: 'Breach response',
+          text: 'If a breach affects your data, we will notify you and the relevant regulator within the timelines required by law, with a plain-English account of what happened.',
+        },
+      ],
+    },
+    {
+      id: 'your-rights',
+      title: '6. Your rights',
+      body: [
+        {
+          heading: 'Access, correction, deletion',
+          text: 'You can request a copy of your data, ask us to correct it, or ask us to delete it where law allows.',
+        },
+        {
+          heading: 'Portability & objection',
+          text: 'You can export your business data at any time from the product you use, and object to processing based on legitimate interests.',
+        },
+        {
+          heading: 'Non-discrimination',
+          text: 'We will never degrade your service for exercising privacy rights — including CCPA/CPRA opt-outs and GDPR requests.',
+        },
+        {
+          heading: 'How to exercise rights',
+          text: `Email ${BRAND.email} with the subject “Privacy request”. We verify your identity and respond within 30 days.`,
+        },
+      ],
+    },
+    {
+      id: 'cookies',
+      title: '7. Cookies & tracking',
+      body: [
+        {
+          heading: 'Strictly necessary only, by default',
+          text: 'The public website uses no tracking cookies. Our products use only cookies required for sign-in and security.',
+        },
+        {
+          heading: 'Opt-in for everything else',
+          text: 'If we ever add analytics or advertising cookies, we will ask first, honour your choice, and provide a persistent opt-out.',
+        },
+      ],
+    },
+    {
+      id: 'children',
+      title: '8. Children & employees',
+      body: [
+        {
+          heading: 'Children',
+          text: 'The service is not directed at children under 16, and we do not knowingly collect their data. If you believe a child’s data reached us, we will delete it promptly.',
+        },
+        {
+          heading: 'Your staff and customers',
+          text: 'If you use a Bosqen product that processes your staff or customer data on your behalf, you remain the controller of that data; we act as processor and honour your instructions. You must provide your own notices to them.',
+        },
+        {
+          heading: 'Employee data',
+          text: 'We collect employee data only for workforce administration, and never use it for targeted advertising.',
+        },
+      ],
+    },
+    {
+      id: 'international',
+      title: '9. International transfers',
+      body: [
+        {
+          heading: 'Where data lives',
+          text: 'Primary data hosting is in the EU (with regional options available). Where data crosses borders, we use recognised safeguards such as Standard Contractual Clauses.',
+        },
+      ],
+    },
+    {
+      id: 'changes',
+      title: '10. Changes, contact & complaints',
+      body: [
+        {
+          heading: 'Changes to this policy',
+          text: 'If we make material changes, we will notify registered customers by email at least 30 days before they take effect, and post the new policy here with a new “last updated” date.',
+        },
+        {
+          heading: 'Contact',
+          text: `Bosqen — ${BRAND.email}. Written complaints: address available on request.`,
+        },
+        {
+          heading: 'Complaints',
+          text: 'You may complain to your local data-protection authority at any time; we would appreciate the chance to resolve it with you first.',
+        },
+      ],
+    },
+  ],
+}
+
+/* ------------------------------------------------------------------ */
+/*  Enquiry / demo-request form page                                   */
+/* ------------------------------------------------------------------ */
+
+export const ENQUIRY_FORM = {
+  eyebrow: 'Get started',
+  heading: 'Tell us about your business',
+  subheading:
+    'A real person replies within one business day with next steps for piloting Bosqen in your business — no obligation.',
+  assurances: [
+    { icon: Clock, label: 'Reply within 24 hours' },
+    { icon: Gift, label: 'Free pilot plan, no commitment' },
+    { icon: ShieldCheck, label: 'Your data stays yours' },
+  ],
+  form: {
+    name: 'Full name',
+    businessName: 'Business name (optional)',
+    email: 'Work email',
+    phone: 'Phone',
+    message: 'Anything else we should know? (optional)',
+    messagePlaceholder: 'Tell us about your goals, timelines, or anything else relevant…',
+    consent: 'I agree to the Privacy Policy and to being contacted about my enquiry.',
+    submit: 'Send enquiry',
+    submitting: 'Sending…',
+    successTitle: 'Enquiry received — thank you!',
+    successBody:
+      'We have logged your details and a member of the team will reply within one business day. In the meantime, you can explore the site or read our Privacy Policy.',
+    errorBody: 'Something went wrong sending your enquiry. Please email us directly — we will still reply within 24 hours.',
+    privacyError: 'Please accept the Privacy Policy so we can reply to you.',
+  },
+}
+
+/* ------------------------------------------------------------------ */
 /*  Footer                                                             */
 /* ------------------------------------------------------------------ */
 
 export const FOOTER = {
   blurb:
-    'The AI layer for digital marketing — plan, launch, and optimize every campaign from one place.',
+    'The AI layer for digital marketing — plan, launch, and optimize every campaign from one place. Now with a full point-of-sale platform.',
   contactLabel: 'Contact',
   copyright: `© ${new Date().getFullYear()} Bosqen. All rights reserved.`,
-  legal: ['Privacy', 'Terms', 'Cookies'],
+  legal: ['Privacy Policy'],
   services: [
     'AI Campaign Strategy',
     'Generative Creative',
