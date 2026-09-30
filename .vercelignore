@@ -1,0 +1,10 @@
+# Keep the uploaded build artifact small — only what's needed to serve
+node_modules
+.git
+.github
+logs
+.vscode
+.idea
+*.local
+*.code-workspace
+README.md
