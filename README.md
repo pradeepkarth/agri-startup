@@ -17,7 +17,7 @@ Both are standalone Vite entry points (multi-page build configured in `vite.conf
 
 HTTP contract: `POST` only (`405` otherwise) · `400` invalid input · `500` when Resend rejects or fails — success is returned only after Resend accepts the email. Client-facing errors are always generic; details go to the Vercel runtime logs.
 
-**Secret handling.** The Resend API key exists only server-side. It is stored as the GitHub Actions secret `RESEND_API_KEY`; the deploy workflow (`.github/workflows/vercel-deploy.yml`) syncs it into Vercel's runtime environment with `vercel env add RESEND_API_KEY production preview --force`, piping the value via stdin and discarding CLI output, so it never appears in logs, frontend JavaScript, or build artifacts. The function reads it with `process.env.RESEND_API_KEY`. There is no `.env` file in the repo.
+**Secret handling.** The Resend API key exists only server-side. It is stored as the GitHub Actions secret `RESEND_API_KEY`; the deploy workflow (`.github/workflows/vercel-deploy.yml`) links the CI checkout to the Vercel project (`vercel link` using the `VERCEL_ORG_ID`/`VERCEL_PROJECT_ID` secrets — CI runners have no `.vercel` directory, which `vercel env add` requires) and then syncs the key into Vercel's runtime environment with `vercel env add RESEND_API_KEY production preview --force`, piping the value via stdin and discarding CLI output, so it never appears in logs, frontend JavaScript, or build artifacts. The function reads it with `process.env.RESEND_API_KEY`. There is no `.env` file in the repo.
 
 #### One-time Resend setup (user action required)
 

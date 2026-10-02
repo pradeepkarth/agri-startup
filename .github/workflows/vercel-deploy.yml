@@ -37,7 +37,13 @@ jobs:
       # Sync the Resend API key from GitHub secrets into Vercel's runtime
       # environment (idempotent). The value is piped via stdin — it never
       # appears in argv, command output, or logs; stdout is discarded.
-      - name: Sync RESEND_API_KEY to Vercel
+      #
+      # CI runners have no .vercel project linkage, and `vercel env add` does
+      # not resolve the project from VERCEL_ORG_ID/VERCEL_PROJECT_ID the way
+      # pull/build/deploy do — it fails with "Could not retrieve Project
+      # Settings". So we first link the checkout explicitly to the existing
+      # project using the same secrets, then add/update the variable.
+      - name: Link project & sync RESEND_API_KEY to Vercel
         env:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
         run: |
@@ -45,6 +51,13 @@ jobs:
             echo "::error::RESEND_API_KEY is not set in GitHub repo secrets"
             exit 1
           fi
+          # Drop any stale/foreign .vercel linkage so `vercel link` always
+          # binds the checkout to the project from the repo secrets.
+          rm -rf .vercel
+          npx vercel link --yes \
+            --project "$VERCEL_PROJECT_ID" \
+            --scope "$VERCEL_ORG_ID" \
+            --token="$VERCEL_TOKEN" > /dev/null
           printf '%s' "$RESEND_API_KEY" | npx vercel env add RESEND_API_KEY production --force --token="$VERCEL_TOKEN" > /dev/null
           printf '%s' "$RESEND_API_KEY" | npx vercel env add RESEND_API_KEY preview --force --token="$VERCEL_TOKEN" > /dev/null
 
