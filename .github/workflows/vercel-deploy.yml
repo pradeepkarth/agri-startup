@@ -34,6 +34,20 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Sync the Resend API key from GitHub secrets into Vercel's runtime
+      # environment (idempotent). The value is piped via stdin — it never
+      # appears in argv, command output, or logs; stdout is discarded.
+      - name: Sync RESEND_API_KEY to Vercel
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+        run: |
+          if [ -z "$RESEND_API_KEY" ]; then
+            echo "::error::RESEND_API_KEY is not set in GitHub repo secrets"
+            exit 1
+          fi
+          printf '%s' "$RESEND_API_KEY" | npx vercel env add RESEND_API_KEY production --force --token="$VERCEL_TOKEN" > /dev/null
+          printf '%s' "$RESEND_API_KEY" | npx vercel env add RESEND_API_KEY preview --force --token="$VERCEL_TOKEN" > /dev/null
+
       - name: Pull Vercel environment
         run: npx vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
 

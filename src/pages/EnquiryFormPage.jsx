@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import StandaloneLayout from '../components/StandaloneLayout.jsx'
-import { ArrowRight, CheckCircle2, Clock, Gift, ShieldCheck, Send, AlertCircle } from 'lucide-react'
+import { ArrowRight, CheckCircle2, Clock, Gift, ShieldCheck, Send, AlertCircle, Loader2 } from 'lucide-react'
 import { ENQUIRY_FORM, BRAND, routes } from '../constants/content.js'
+
 const initialForm = {
   name: '',
   businessName: '',
@@ -9,12 +10,15 @@ const initialForm = {
   phone: '',
   message: '',
   consent: false,
+  // Honeypot: hidden field humans never see — bots fill it, the API drops it.
+  companyWebsite: '',
 }
 
 export default function EnquiryFormPage() {
   const [form, setForm] = useState(initialForm)
-  const [status, setStatus] = useState('idle') // idle | sending | success | error
   const [errors, setErrors] = useState({})
+  // idle | sending | success | error
+  const [status, setStatus] = useState('idle')
 
   const set = (key) => (e) => {
     const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value
@@ -33,6 +37,8 @@ export default function EnquiryFormPage() {
 
   const onSubmit = async (e) => {
     e.preventDefault()
+    if (status === 'sending') return // guard against duplicate submissions
+
     const errs = validate()
     if (Object.keys(errs).length > 0) {
       setErrors(errs)
@@ -41,34 +47,20 @@ export default function EnquiryFormPage() {
 
     setStatus('sending')
     try {
-      // Delivers to BRAND.email via FormSubmit (free, no backend).
-      // NOTE: the very first submission ever sends an activation email to
-      // support@bosqen.com — click the link in it once to start receiving enquiries.
-      const controller = new AbortController()
-      const timeout = setTimeout(() => controller.abort(), 10000)
-      const res = await fetch(`https://formsubmit.co/ajax/${BRAND.email}`, {
+      const res = await fetch('/api/contact', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        signal: controller.signal,
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          _subject: `New Bosqen enquiry — ${form.name}${form.businessName ? ` (${form.businessName})` : ''}`,
-          _template: 'table',
-          _captcha: 'false',
-          Name: form.name,
-          'Business name': form.businessName || '—',
-          Email: form.email,
-          Phone: form.phone,
-          Message: form.message || '—',
+          name: form.name.trim(),
+          businessName: form.businessName.trim(),
+          email: form.email.trim(),
+          phone: form.phone.trim(),
+          message: form.message.trim(),
+          consent: form.consent,
+          companyWebsite: form.companyWebsite,
         }),
       })
-      clearTimeout(timeout)
-      if (!res.ok) throw new Error(`FormSubmit responded ${res.status}`)
-      const data = await res.json()
-      if (data.success !== 'true' && data.success !== true) {
-        throw new Error(data.message || 'FormSubmit rejected the submission')
-      }
-      setStatus('success')
-      setForm(initialForm)
+      setStatus(res.ok ? 'success' : 'error')
     } catch {
       setStatus('error')
     }
@@ -138,11 +130,22 @@ export default function EnquiryFormPage() {
         )}
 
         <form onSubmit={onSubmit} className="mt-8 grid gap-5 sm:grid-cols-2" noValidate>
+          {/* Honeypot anti-spam field — bots fill it, humans never see it */}
+          <input
+            type="text"
+            name="companyWebsite"
+            value={form.companyWebsite}
+            onChange={set('companyWebsite')}
+            style={{ display: 'none' }}
+            tabIndex={-1}
+            autoComplete="off"
+          />
+
           <div>
             <label htmlFor="name" className="mb-1.5 block text-sm font-medium text-slate-300">
               {ENQUIRY_FORM.form.name} <span className="text-brand-400">*</span>
             </label>
-            <input id="name" name="name" type="text" value={form.name} onChange={set('name')} className={field} />
+            <input id="name" name="name" type="text" value={form.name} onChange={set('name')} className={field} required />
             {errors.name && <p className="mt-1.5 text-xs text-red-400">{errors.name}</p>}
           </div>
 
@@ -164,7 +167,7 @@ export default function EnquiryFormPage() {
             <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-slate-300">
               {ENQUIRY_FORM.form.email} <span className="text-brand-400">*</span>
             </label>
-            <input id="email" name="email" type="email" value={form.email} onChange={set('email')} className={field} />
+            <input id="email" name="email" type="email" value={form.email} onChange={set('email')} className={field} required />
             {errors.email && <p className="mt-1.5 text-xs text-red-400">{errors.email}</p>}
           </div>
 
@@ -180,6 +183,7 @@ export default function EnquiryFormPage() {
               onChange={set('phone')}
               className={field}
               inputMode="tel"
+              required
             />
             {errors.phone && <p className="mt-1.5 text-xs text-red-400">{errors.phone}</p>}
           </div>
@@ -203,6 +207,7 @@ export default function EnquiryFormPage() {
             <label className="flex items-start gap-3 text-sm text-slate-400">
               <input
                 type="checkbox"
+                name="consent"
                 checked={form.consent}
                 onChange={set('consent')}
                 className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-600 bg-slate-900 accent-brand-500"
@@ -222,17 +227,15 @@ export default function EnquiryFormPage() {
             <button
               type="submit"
               disabled={status === 'sending'}
-              className="group inline-flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-brand-600 to-brand-500 px-6 py-3 text-sm font-semibold text-white shadow-lg transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+              className="group inline-flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-brand-600 to-brand-500 px-6 py-3 text-sm font-semibold text-white shadow-lg transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100 sm:w-auto"
             >
               {status === 'sending' ? (
-                ENQUIRY_FORM.form.submitting
+                <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <>
-                  <Send className="h-4 w-4" />
-                  {ENQUIRY_FORM.form.submit}
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </>
+                <Send className="h-4 w-4" />
               )}
+              {status === 'sending' ? ENQUIRY_FORM.form.submitting : ENQUIRY_FORM.form.submit}
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </button>
           </div>
         </form>
