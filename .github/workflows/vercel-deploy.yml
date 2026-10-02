@@ -35,15 +35,19 @@ jobs:
         run: npm ci
 
       # Sync the Resend API key from GitHub secrets into Vercel's runtime
-      # environment (idempotent). The value is piped via stdin — it never
-      # appears in argv, command output, or logs; stdout is discarded.
+      # environment (idempotent upsert, both production and preview targets).
       #
-      # CI runners have no .vercel project linkage, and `vercel env add` does
-      # not resolve the project from VERCEL_ORG_ID/VERCEL_PROJECT_ID the way
-      # pull/build/deploy do — it fails with "Could not retrieve Project
-      # Settings". So we first link the checkout explicitly to the existing
-      # project using the same secrets, then add/update the variable.
-      - name: Link project & sync RESEND_API_KEY to Vercel
+      # This uses the Vercel REST API directly instead of `vercel link` +
+      # `vercel env add`: the CI token is project-scoped and cannot resolve a
+      # CLI user ("User not found (404)"), and a fresh CI checkout has no
+      # .vercel linkage for `vercel env add` anyway. pull/build/deploy below
+      # already resolve the project from VERCEL_ORG_ID/VERCEL_PROJECT_ID.
+      #
+      # Secret handling: the value is built with jq --arg (proper escaping),
+      # piped to curl via stdin (never argv), the response is written to a
+      # temp file that is always deleted, and only status/error CODES are
+      # echoed — never the response body, which can echo the stored value.
+      - name: Sync RESEND_API_KEY to Vercel
         env:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
         run: |
@@ -51,15 +55,39 @@ jobs:
             echo "::error::RESEND_API_KEY is not set in GitHub repo secrets"
             exit 1
           fi
-          # Drop any stale/foreign .vercel linkage so `vercel link` always
-          # binds the checkout to the project from the repo secrets.
-          rm -rf .vercel
-          npx vercel link --yes \
-            --project "$VERCEL_PROJECT_ID" \
-            --scope "$VERCEL_ORG_ID" \
-            --token="$VERCEL_TOKEN" > /dev/null
-          printf '%s' "$RESEND_API_KEY" | npx vercel env add RESEND_API_KEY production --force --token="$VERCEL_TOKEN" > /dev/null
-          printf '%s' "$RESEND_API_KEY" | npx vercel env add RESEND_API_KEY preview --force --token="$VERCEL_TOKEN" > /dev/null
+
+          RESP_FILE=$(mktemp)
+          trap 'rm -f "$RESP_FILE"' EXIT
+
+          sync_env() {
+            local with_team="$1" url payload
+            url="https://api.vercel.com/v10/projects/${VERCEL_PROJECT_ID}/env?upsert=true"
+            if [ "$with_team" = "yes" ]; then
+              url="${url}&teamId=${VERCEL_ORG_ID}"
+            fi
+            payload=$(jq -n --arg value "$RESEND_API_KEY" \
+              '{key: "RESEND_API_KEY", value: $value, type: "encrypted", target: ["production", "preview"], comment: "Resend API key for /api/contact — synced by GitHub Actions"}')
+            printf '%s' "$payload" | curl -sS -o "$RESP_FILE" -w '%{http_code}' \
+              -X POST "$url" \
+              -H "Authorization: Bearer ${VERCEL_TOKEN}" \
+              -H "Content-Type: application/json" \
+              --data-binary @-
+          }
+
+          http_code=$(sync_env yes)
+          if [ "$http_code" != "201" ]; then
+            echo "Sync with teamId returned HTTP $http_code — retrying without teamId (personal accounts)…"
+            http_code=$(sync_env no)
+          fi
+
+          if [[ "$http_code" == 2* ]] \
+            && [ "$(jq -r '(.failed // []) | length' "$RESP_FILE" 2>/dev/null || echo 1)" = "0" ]; then
+            echo "RESEND_API_KEY synced to Vercel (production + preview)."
+          else
+            codes=$(jq -r 'if .failed then ([.failed[].error.code] | join(", ")) elif .error then .error.code else "unknown" end' "$RESP_FILE" 2>/dev/null || echo "unknown")
+            echo "::error::Vercel env sync failed (HTTP $http_code, error codes: $codes). Check VERCEL_TOKEN permissions, VERCEL_ORG_ID, and VERCEL_PROJECT_ID."
+            exit 1
+          fi
 
       - name: Pull Vercel environment
         run: npx vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
